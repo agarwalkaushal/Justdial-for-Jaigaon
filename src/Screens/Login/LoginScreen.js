@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { Button, TextInput, View, Text, Image, StyleSheet, ActivityIndicator, ToastAndroid, TouchableOpacity } from 'react-native';
+import { Button, TextInput, View, Text, Image, StyleSheet, ActivityIndicator, ToastAndroid, TouchableOpacity, AsyncStorage } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import OTPInputView from '@twotalltotems/react-native-otp-input'
 
@@ -44,9 +44,10 @@ class LoginScreen extends React.Component {
     }
 
     async signInWithPhoneNumber() {
+        await AsyncStorage.setItem("pNo", this.state.number);
         this.setState({ requestingOtp: true })
         try {
-            const confirmation = await auth().signInWithPhoneNumber(this.state.number)
+            const confirmation = await auth().signInWithPhoneNumber('+91'+this.state.number)
             if (confirmation)
                 this.setState({ confirm: confirmation, getOtp: false, requestingOtp: false })
         } catch (error) {
@@ -79,7 +80,6 @@ class LoginScreen extends React.Component {
                         <View style={style.inputContainer}>
                             <Text style={style.info}>Hi, We'll need your mobile number to get started. Please enter below. </Text>
                             <TextInput
-                                defaultValue={'+91'}
                                 style={style.input}
                                 value={this.state.number}
                                 keyboardType={'numeric'}
@@ -92,7 +92,7 @@ class LoginScreen extends React.Component {
                                     title="GET OTP"
                                     color="#735fbe"
                                     onPress={() => this.signInWithPhoneNumber()}
-                                    disabled={this.state.number ? (this.state.number.length !== 13 ? true : false) : true}
+                                    disabled={this.state.number ? (this.state.number.length !== 10 ? true : false) : true}
                                 /> :
                                 <ActivityIndicator size="small" color="#D3D3D3" />}
                         </View>
