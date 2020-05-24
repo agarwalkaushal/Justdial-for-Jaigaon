@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet, AsyncStorage, ToastAndroid } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, AsyncStorage, ToastAndroid, StatusBar } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 import { NavigationActions } from 'react-navigation';
@@ -21,7 +21,7 @@ class SplashScreen extends React.Component {
         var userDetails = null;
         const user = auth().currentUser;
         const pNo = await AsyncStorage.getItem('pNo');
-        
+
         if (pNo) {
             axios.get('http://10.0.2.2:8080/user/' + pNo)
                 .then(function (response) {
@@ -43,9 +43,12 @@ class SplashScreen extends React.Component {
 
     render() {
         return (
-            <View style={style.screen}>
-                <ActivityIndicator style={style.indicator} />
-            </View>
+            <>
+                <StatusBar hidden />
+                <View style={style.screen}>
+                    <ActivityIndicator style={style.indicator} />
+                </View>
+            </>
         );
     }
 }

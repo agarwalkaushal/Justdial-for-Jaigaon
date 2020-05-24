@@ -27,7 +27,7 @@ const RootStack = createSwitchNavigator(
         HomeStack: HomeStack,
     },
     {
-        initialRouteName: 'SplashScreen',
+        initialRouteName: 'UserFormScreen',
     }
 );
 

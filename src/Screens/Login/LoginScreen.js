@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { Button, TextInput, View, Text, Image, StyleSheet, ActivityIndicator, ToastAndroid, TouchableOpacity, AsyncStorage } from 'react-native';
+import { Button, TextInput, View, Text, Image, StyleSheet, ActivityIndicator, ToastAndroid, TouchableOpacity, AsyncStorage, StatusBar } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import OTPInputView from '@twotalltotems/react-native-otp-input'
 
@@ -25,16 +25,24 @@ class LoginScreen extends React.Component {
         this.setState({ getOtp: true })
     }
 
+    navigateToFormScreen = () => {
+        this.props.navigation.navigate('UserFormScreen')
+    }
+
+    navigateToHomeStack = () => {
+        this.props.navigation.navigate('HomeStack')
+    }
+
     onAuthStateChanged(user) {
         this.setState({ confirmingCode: true })
         if (user) {
-            this.props.navigation.navigate('HomeStack')
+            this.navigateToFormScreen();
         }
     }
 
     componentDidMount() {
         if (auth().currentUser) {
-            this.props.navigation.navigate('HomeStack')
+            this.navigateToFormScreen();
         }
         auth().onAuthStateChanged(this.onAuthStateChanged);
     }
@@ -47,7 +55,7 @@ class LoginScreen extends React.Component {
         await AsyncStorage.setItem("pNo", this.state.number);
         this.setState({ requestingOtp: true })
         try {
-            const confirmation = await auth().signInWithPhoneNumber('+91'+this.state.number)
+            const confirmation = await auth().signInWithPhoneNumber('+91' + this.state.number)
             if (confirmation)
                 this.setState({ confirm: confirmation, getOtp: false, requestingOtp: false })
         } catch (error) {
@@ -61,7 +69,7 @@ class LoginScreen extends React.Component {
         try {
             await this.state.confirm.confirm(this.state.code);
             if (auth().currentUser) {
-                this.props.navigation.navigate('HomeStack');
+                this.navigateToFormScreen();
             }
         } catch (error) {
             this.setState({ getOtp: true, confirmingCode: false })
@@ -71,63 +79,66 @@ class LoginScreen extends React.Component {
 
     render() {
         return (
-            <View style={style.screen}>
-                <View style={style.iconContainer}>
-                    <Image source={require('../../Images/travel.png')} style={style.icon} />
-                </View>
-                {this.state.getOtp ?
-                    (<View>
-                        <View style={style.inputContainer}>
-                            <Text style={style.info}>Hi, We'll need your mobile number to get started. Please enter below. </Text>
-                            <TextInput
-                                style={style.input}
-                                value={this.state.number}
-                                keyboardType={'numeric'}
-                                onChangeText={text => this.setState({ number: text })}
-                            />
-                        </View>
-                        <View style={style.button}>
-                            {!this.state.requestingOtp ?
-                                <Button
-                                    title="GET OTP"
-                                    color="#735fbe"
-                                    onPress={() => this.signInWithPhoneNumber()}
-                                    disabled={this.state.number ? (this.state.number.length !== 10 ? true : false) : true}
-                                /> :
-                                <ActivityIndicator size="small" color="#D3D3D3" />}
-                        </View>
-                    </View>) :
+            <>
+                <StatusBar hidden />
+                <View style={style.screen}>
+                    <View style={style.iconContainer}>
+                        <Image source={require('../../Images/travel.png')} style={style.icon} />
+                    </View>
+                    {this.state.getOtp ?
+                        (<View>
+                            <View style={style.inputContainer}>
+                                <Text style={style.info}>Hi, We'll need your mobile number to get started. Please enter below. </Text>
+                                <TextInput
+                                    style={style.input}
+                                    value={this.state.number}
+                                    keyboardType={'numeric'}
+                                    onChangeText={text => this.setState({ number: text })}
+                                />
+                            </View>
+                            <View style={style.button}>
+                                {!this.state.requestingOtp ?
+                                    <Button
+                                        title="GET OTP"
+                                        color="#735fbe"
+                                        onPress={() => this.signInWithPhoneNumber()}
+                                        disabled={this.state.number ? (this.state.number.length !== 10 ? true : false) : true}
+                                    /> :
+                                    <ActivityIndicator size="small" color="#D3D3D3" />}
+                            </View>
+                        </View>) :
 
-                    (<View>
-                        <View style={style.inputContainer}>
-                            <Text style={style.info}>Please enter OTP sent to {this.state.number} </Text>
-                            <OTPInputView
-                                style={{ width: '65%', height: 50 }}
-                                pinCount={6}
-                                onCodeChanged={text => this.setState({ code: text })}
-                                autoFocusOnLoad
-                                codeInputFieldStyle={style.underlineStyleBase}
-                                codeInputHighlightStyle={style.underlineStyleHighLighted} />
-                        </View>
-                        <View style={style.button}>
-                            {!this.state.confirmingCode ?
-                                <Button
-                                    title="Confirm Code"
-                                    color="#735fbe"
-                                    onPress={() => this.confirmCode()}
-                                    disabled={this.state.code ? (this.state.code.length !== 6 ? true : false) : true}
-                                /> :
-                                <ActivityIndicator size="small" color="#D3D3D3" />}
-                        </View>
-                        <TouchableOpacity onPress={() => this.signInWithPhoneNumber()}>
-                            <Text style={style.resendCode}>RESEND CODE</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => this.getOtpFlow()}>
-                            <Text style={style.changeNumber}>CHANGE NUMBER</Text>
-                        </TouchableOpacity>
-                    </View>)}
-                <Text style={style.tc}>By signing in you agree to our Terms &amp; Conditions</Text>
-            </View>
+                        (<View>
+                            <View style={style.inputContainer}>
+                                <Text style={style.info}>Please enter OTP sent to {this.state.number} </Text>
+                                <OTPInputView
+                                    style={{ width: '65%', height: 50 }}
+                                    pinCount={6}
+                                    onCodeChanged={text => this.setState({ code: text })}
+                                    autoFocusOnLoad
+                                    codeInputFieldStyle={style.underlineStyleBase}
+                                    codeInputHighlightStyle={style.underlineStyleHighLighted} />
+                            </View>
+                            <View style={style.button}>
+                                {!this.state.confirmingCode ?
+                                    <Button
+                                        title="Confirm Code"
+                                        color="#735fbe"
+                                        onPress={() => this.confirmCode()}
+                                        disabled={this.state.code ? (this.state.code.length !== 6 ? true : false) : true}
+                                    /> :
+                                    <ActivityIndicator size="small" color="#D3D3D3" />}
+                            </View>
+                            <TouchableOpacity onPress={() => this.signInWithPhoneNumber()}>
+                                <Text style={style.resendCode}>RESEND CODE</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => this.getOtpFlow()}>
+                                <Text style={style.changeNumber}>CHANGE NUMBER</Text>
+                            </TouchableOpacity>
+                        </View>)}
+                    <Text style={style.tc}>By signing in you agree to our Terms &amp; Conditions</Text>
+                </View>
+            </>
         );
     }
 }
