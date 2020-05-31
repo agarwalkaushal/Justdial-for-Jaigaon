@@ -13,7 +13,7 @@ class UserScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            profilePicture: require('../../Images/user.png'),
+            profilePicture: require('../../Images/person.png'),
             userDetails: null,
             pNo: null,
             url: null,
