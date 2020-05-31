@@ -1,8 +1,6 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { Button, TextInput, View, Text, Image, StyleSheet, ActivityIndicator, Col, Item, Input } from 'react-native';
-import auth from '@react-native-firebase/auth';
-import { ScrollView } from 'react-native-gesture-handler';
+import { View, Text, StyleSheet } from 'react-native';
 
 class HomeScreen extends React.Component {
 
@@ -10,18 +8,12 @@ class HomeScreen extends React.Component {
         super(props);
         this.state = {
         };
-        this.signOut = this.signOut.bind(this)
-    }
-
-    async signOut() {
-        auth().signOut().then(() => console.log('User signed out!'));
-        //TODO: Navigate to Login screen
     }
 
     render() {
         return (
             <View style={style.screen}>
-                <Text>Welcome {auth().currentUser.phoneNumber}</Text>
+                <Text>TODO</Text>
             </View>
         );
     }
@@ -32,8 +24,11 @@ export default HomeScreen;
 const style = StyleSheet.create(
     {
         screen: {
+            backgroundColor: 'white',
             width: '100%',
-            height: '100%'
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center'
         }
     }
 );

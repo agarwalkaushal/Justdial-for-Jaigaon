@@ -2,7 +2,9 @@
 import React from 'react';
 import { Button, TextInput, View, Text, Image, StyleSheet, ActivityIndicator, ToastAndroid, TouchableOpacity, AsyncStorage, StatusBar } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import OTPInputView from '@twotalltotems/react-native-otp-input'
+import OTPInputView from '@twotalltotems/react-native-otp-input';
+import firestore from '@react-native-firebase/firestore';
+import * as firebase from 'firebase';
 
 class LoginScreen extends React.Component {
 
@@ -11,70 +13,63 @@ class LoginScreen extends React.Component {
         this.state = {
             confirm: null,
             code: null,
-            number: null,
+            number: props.navigation.getParam('number', null),
             getOtp: true,
             requestingOtp: false,
-            confirmingCode: false
+            confirmingCode: false,
+            userDetails: props.navigation.getParam('userDetails', null)
         };
         this.signInWithPhoneNumber = this.signInWithPhoneNumber.bind(this)
         this.confirmCode = this.confirmCode.bind(this)
-        this.onAuthStateChanged = this.onAuthStateChanged.bind(this)
     }
 
     getOtpFlow = () => {
-        this.setState({ getOtp: true })
+        this.setState({ getOtp: true, requestingOtp: false, confirmingCode: false })
     }
 
     navigateToFormScreen = () => {
-        this.props.navigation.navigate('UserFormScreen')
+        this.props.navigation.navigate('UserFormScreen', { number: this.state.number });
     }
 
-    navigateToHomeStack = () => {
-        this.props.navigation.navigate('HomeStack')
+    navigateToHome = () => {
+        this.props.navigation.navigate('TabNavigator')
     }
 
-    onAuthStateChanged(user) {
-        this.setState({ confirmingCode: true })
-        if (user) {
-            this.navigateToFormScreen();
-        }
-    }
-
-    componentDidMount() {
-        if (auth().currentUser) {
-            this.navigateToFormScreen();
-        }
-        auth().onAuthStateChanged(this.onAuthStateChanged);
-    }
-
-    componentWillUnmount() {
-        //TODO: Handle memory leak 
+    getUserDetails = async () => {
+        const userDetails = await firestore().collection('Users').doc('+91' + this.state.number).get();
+        console.log(userDetails, "userDetails")
+        if (userDetails._data && Object.keys(userDetails._data).length !== 0) {
+            this.navigateToHome()
+        } else
+            this.navigateToFormScreen()
     }
 
     async signInWithPhoneNumber() {
-        await AsyncStorage.setItem("pNo", this.state.number);
         this.setState({ requestingOtp: true })
+        ToastAndroid.show('You\'ll receive an otp shortly', ToastAndroid.SHORT);
+        await AsyncStorage.setItem("pNo", '+91' + this.state.number);
         try {
             const confirmation = await auth().signInWithPhoneNumber('+91' + this.state.number)
-            if (confirmation)
-                this.setState({ confirm: confirmation, getOtp: false, requestingOtp: false })
+            if (confirmation) {
+                this.setState({ confirm: confirmation, verficationId: confirmation._verificationId, getOtp: false, requestingOtp: false })
+            }
         } catch (error) {
             this.setState({ getOtp: true, requestingOtp: false })
-            ToastAndroid.show(String(error), ToastAndroid.SHORT);
+            console.log(error, "get otp error")
         }
     }
 
     async confirmCode() {
         this.setState({ confirmingCode: true })
-        try {
-            await this.state.confirm.confirm(this.state.code);
-            if (auth().currentUser) {
-                this.navigateToFormScreen();
-            }
-        } catch (error) {
-            this.setState({ getOtp: true, confirmingCode: false })
-            ToastAndroid.show(String(error), ToastAndroid.SHORT);
-        }
+        var credential = firebase.auth.PhoneAuthProvider.credential(this.state.verficationId, this.state.code);
+        auth().signInWithCredential(credential).then(
+            this.getUserDetails()
+        ).catch(error => {
+            if (String(error) === 'Error: [auth/invalid-credential] The supplied auth credential is malformed, has expired or is not currently supported.')
+                return;
+            console.log(error, "submit otp error")
+            this.setState({ confirmingCode: false })
+        })
     }
 
     render() {
@@ -91,7 +86,7 @@ class LoginScreen extends React.Component {
                                 <Text style={style.info}>Hi, We'll need your mobile number to get started. Please enter below. </Text>
                                 <TextInput
                                     style={style.input}
-                                    value={this.state.number}
+                                    // value={this.state.number.length === 13 ? this.state.number.substring(3) : this.state.number}
                                     keyboardType={'numeric'}
                                     onChangeText={text => this.setState({ number: text })}
                                 />
@@ -110,7 +105,12 @@ class LoginScreen extends React.Component {
 
                         (<View>
                             <View style={style.inputContainer}>
-                                <Text style={style.info}>Please enter OTP sent to {this.state.number} </Text>
+
+                                <Text style={style.info1}>Please enter OTP sent to {this.state.number} </Text>
+                                <TouchableOpacity onPress={() => this.getOtpFlow()}>
+                                    <Text style={style.changeNumber}>(CHANGE NUMBER)</Text>
+                                </TouchableOpacity>
+
                                 <OTPInputView
                                     style={{ width: '65%', height: 50 }}
                                     pinCount={6}
@@ -129,12 +129,12 @@ class LoginScreen extends React.Component {
                                     /> :
                                     <ActivityIndicator size="small" color="#D3D3D3" />}
                             </View>
-                            <TouchableOpacity onPress={() => this.signInWithPhoneNumber()}>
-                                <Text style={style.resendCode}>RESEND CODE</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => this.getOtpFlow()}>
-                                <Text style={style.changeNumber}>CHANGE NUMBER</Text>
-                            </TouchableOpacity>
+                            {!this.state.requestingOtp ?
+                                <TouchableOpacity onPress={() => this.signInWithPhoneNumber()}>
+                                    <Text style={style.resendCode}>RESEND CODE</Text>
+                                </TouchableOpacity> : null
+                            }
+
                         </View>)}
                     <Text style={style.tc}>By signing in you agree to our Terms &amp; Conditions</Text>
                 </View>
@@ -169,7 +169,17 @@ const style = StyleSheet.create(
             fontWeight: 'bold',
             textAlign: 'center',
             alignSelf: 'center',
-            marginBottom: 30
+            marginBottom: 30,
+        },
+
+        info1: {
+            color: 'white',
+            width: '75%',
+            fontSize: 13,
+            fontWeight: 'bold',
+            textAlign: 'center',
+            alignSelf: 'center',
+            marginBottom: 10,
         },
 
         input: {
@@ -223,21 +233,21 @@ const style = StyleSheet.create(
         resendCode: {
             color: 'white',
             width: '75%',
-            fontSize: 17.5,
+            fontSize: 13.5,
             fontWeight: 'bold',
             textAlign: 'center',
             alignSelf: 'center',
             marginTop: 15,
-            marginBottom: 30
+            marginBottom: 30,
         },
 
         changeNumber: {
             color: '#735fbe',
-            width: '75%',
-            fontSize: 15,
+            fontSize: 12,
             fontWeight: 'bold',
             textAlign: 'center',
             alignSelf: 'center',
+            marginBottom: 30,
         }
     }
 )

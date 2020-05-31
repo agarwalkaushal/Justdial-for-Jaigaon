@@ -1,18 +1,15 @@
 import React from 'react';
 import {
-  SafeAreaView,
   StatusBar
 } from 'react-native';
 
-import AppNavigation from '../FirebaseTest2/src/AppNavigation'
+import AppNavigation from './src/AppNavigation'
 
 const App: () => React$Node = () => {
   return (
     <>
-      <StatusBar backgroundColor="#1e121e" />
-      <SafeAreaView>
-        <AppNavigation />
-      </SafeAreaView>
+      <StatusBar backgroundColor="#332033" />
+      <AppNavigation />
     </>
   );
 };

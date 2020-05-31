@@ -23,6 +23,7 @@ DerivedData
 project.xcworkspace
 
 java_pid3086.hprof
+*.hprof
 
 # Android/IntelliJ
 #

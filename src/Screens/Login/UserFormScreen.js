@@ -1,8 +1,7 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
 import { Button, TextInput, View, Text, Image, StyleSheet, ActivityIndicator, StatusBar, ToastAndroid, TouchableOpacity } from 'react-native';
-import auth from '@react-native-firebase/auth';
-import { add } from 'react-native-reanimated';
+import firestore from '@react-native-firebase/firestore';
 
 class UserFormScreen extends React.Component {
 
@@ -11,36 +10,58 @@ class UserFormScreen extends React.Component {
         this.state = {
             submittingForm: false,
             validated: false,
-            firstName: null,
-            lastName: null,
-            address: null,
+            name: null,
+            pincode: null,
+            number: props.navigation.getParam('number', null)
         };
+    }
+
+    navigateToHome = () => {
+        this.props.navigation.navigate('TabNavigator')
     }
 
     postData = () => {
         this.setState({ submittingForm: true });
-        ToastAndroid.show('Cool to proceed', ToastAndroid.SHORT);
 
-        if (!this.state.validated) {
-            //TODO
-        }
+        firestore()
+            .collection('Users')
+            .doc('+91' + this.state.number)
+            .set({
+                name: this.state.name ? this.state.name : 'User',
+                pincode: this.state.pincode ? this.state.pincode : '000000',
+            })
+            .then(() => {
+                ToastAndroid.show('Details saved successfully', ToastAndroid.SHORT);
+                this.navigateToHome();
+                console.log('User added!');
+            });
     }
 
     submitForm = () => {
-        const { firstName, address } = this.state;
+        const { name, pincode } = this.state;
 
-        if (firstName && address) {
+        if (name && pincode.length === 6) {
             this.setState({ validated: true }, () => this.postData());
         } else {
             let errorMsg = '';
 
-            if (!firstName)
-                errorMsg += 'First name, ';
+            if (!name) {
+                errorMsg = 'First name cannot be empty';
+                ToastAndroid.show(errorMsg, ToastAndroid.SHORT);
+                return;
+            }
 
-            if (!address)
-                errorMsg += 'Address, ';
-            ToastAndroid.show(errorMsg + ' cannot be null', ToastAndroid.SHORT);
-            return;
+            if (!pincode) {
+                errorMsg = 'Pincode cannot be empty';
+                ToastAndroid.show(errorMsg, ToastAndroid.SHORT);
+                return;
+            }
+
+            if (pincode.length !== 6) {
+                errorMsg = 'Please enter valid Pincode';
+                ToastAndroid.show(errorMsg, ToastAndroid.SHORT);
+                return;
+            }
         }
     }
 
@@ -55,25 +76,18 @@ class UserFormScreen extends React.Component {
                     </View>
                     <View style={style.form}>
                         <View style={style.formElement}>
-                            <Text style={style.heading}>FIRST NAME</Text>
+                            <Text style={style.heading}>NAME</Text>
                             <TextInput
                                 style={style.input}
                                 autoCapitalize="sentences"
-                                onChangeText={text => this.setState({ firstName: text })} />
+                                onChangeText={text => this.setState({ name: text })} />
                         </View>
                         <View style={style.formElement}>
-                            <Text style={style.heading}>LAST NAME</Text>
+                            <Text style={style.heading}>PIN CODE</Text>
                             <TextInput
                                 style={style.input}
-                                autoCapitalize="sentences"
-                                onChangeText={text => this.setState({ lastName: text })} />
-                        </View>
-                        <View style={style.formElement}>
-                            <Text style={style.heading}>ADDRESS</Text>
-                            <TextInput
-                                style={style.input}
-                                autoCapitalize="sentences"
-                                onChangeText={text => this.setState({ address: text })} />
+                                keyboardType={'numeric'}
+                                onChangeText={text => this.setState({ pincode: text })} />
                         </View>
                     </View>
 

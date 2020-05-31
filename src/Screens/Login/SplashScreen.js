@@ -1,9 +1,8 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet, AsyncStorage, ToastAndroid, StatusBar } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, AsyncStorage, StatusBar } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import axios from 'axios';
-import { NavigationActions } from 'react-navigation';
+import firestore from '@react-native-firebase/firestore';
 
 class SplashScreen extends React.Component {
 
@@ -12,33 +11,24 @@ class SplashScreen extends React.Component {
         this.state = {
             navigation: props.navigation,
         };
-        //this.getUserDetails = this.getUserDetails.bind();
         this.loadUserDetails();
     }
 
     loadUserDetails = async () => {
 
-        var userDetails = null;
         const user = auth().currentUser;
         const pNo = await AsyncStorage.getItem('pNo');
-
-        if (pNo) {
-            axios.get('http://10.0.2.2:8080/user/' + pNo)
-                .then(function (response) {
-                    console.log(response.data);
-                    userDetails = response.data;
-                }).catch(function (error) {
-                    console.log(error);
-                    ToastAndroid.show('Looks like something is broken. Please try again later :/ ', ToastAndroid.LONG);
-                    return;
-                });
-        }
-
+        console.log(user, "user")
         if (user) {
-            this.props.navigation.navigate('HomeStack', { user: userDetails });
+            const userDetails = await firestore().collection('Users').doc(pNo).get();
+            console.log(userDetails, "userDetails")
+            if (userDetails._data && Object.keys(userDetails._data).length !== 0) {
+                this.props.navigation.navigate('TabNavigator');
+            } else
+                this.props.navigation.navigate('UserFormScreen', { number: pNo });
+        } else {
+            this.props.navigation.navigate('LoginScreen', { number: pNo });
         }
-
-        this.props.navigation.navigate('LoginScreen', { user: userDetails });
     }
 
     render() {
