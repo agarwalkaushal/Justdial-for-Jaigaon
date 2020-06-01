@@ -186,13 +186,13 @@ const style = StyleSheet.create(
 
         details: {
             marginTop: 30,
-            borderWidth: .5,
             borderColor: 'rgba(0,0,0,0.2)',
             alignSelf: 'center',
             width: '65%',
+            height: 'auto',
             backgroundColor: '#f6f6f6',
-            borderRadius: 2.5,
-            elevation: 2.5,
+            borderRadius: 3,
+            elevation: 2,
             padding: 10,
         },
 

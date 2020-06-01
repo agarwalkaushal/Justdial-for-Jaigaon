@@ -7,7 +7,14 @@ class BusinessDetailsScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            details: props.details,
+            details: props.navigation.getParam('details', null),
+        };
+    }
+
+    static navigationOptions = ({ navigation }) => {
+        console.log(navigation, 'nav');
+        return {
+            title: navigation.getParam('details').business_name,
         };
     }
 
@@ -33,7 +40,7 @@ const style = StyleSheet.create(
             width: '100%',
             height: '100%',
             justifyContent: 'center',
-            alignItems: 'center'
-        }
+            alignItems: 'center',
+        },
     }
 );
