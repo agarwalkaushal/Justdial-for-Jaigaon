@@ -5,6 +5,7 @@ import SplashScreen from './Screens/Login/SplashScreen';
 import LoginScreen from './Screens/Login/LoginScreen';
 import UserFormScreen from './Screens/Login/UserFormScreen';
 import HomeScreen from './Screens/Home/HomeScreen';
+import BusinessDetailsScreen from './Screens/Home/BusinessDetailsScreen';
 import UserScreen from './Screens/User/UserScreen'
 import {
     createSwitchNavigator,
@@ -20,8 +21,16 @@ const HomeStack = createStackNavigator(
             screen: HomeScreen,
             navigationOptions: {
                 headerShown: false,
-            }
-        }
+            },
+        },
+
+        Details: {
+            screen: BusinessDetailsScreen,
+            navigationOptions: {
+                headerShown: true,
+            },
+        },
+
     },
     {
         initialRouteName: 'Find',
@@ -34,8 +43,8 @@ const UserStack = createStackNavigator(
             screen: UserScreen,
             navigationOptions: {
                 headerShown: false,
-            }
-        }
+            },
+        },
     },
     {
         initialRouteName: 'Profile',
@@ -53,7 +62,7 @@ const TabNavigator = createBottomTabNavigator(
                         source={require('./Images/lead.png')}
                         style={{ width: 25, height: 25, tintColor: tintColor }}
                     />
-                )
+                ),
             },
         },
         User: {
@@ -65,15 +74,12 @@ const TabNavigator = createBottomTabNavigator(
                         source={require('./Images/user.png')}
                         style={{ width: 25, height: 25, tintColor: tintColor }}
                     />
-                )
+                ),
             },
         },
     },
     {
         initialRouteName: 'Home',
-        defaultNavigationOptions: {
-            // TODO: Set icons
-        },
         tabBarOptions: {
             activeTintColor: '#332033',
             inactiveTintColor: 'gray',
