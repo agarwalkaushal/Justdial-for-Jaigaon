@@ -159,7 +159,6 @@ const style = StyleSheet.create(
             marginTop: 15,
             paddingLeft: 30,
             marginLeft: 10,
-            width: "30%"
         },
 
         button2: {

@@ -78,7 +78,7 @@ class LoginScreen extends React.Component {
                 <StatusBar hidden />
                 <View style={style.screen}>
                     <View style={style.iconContainer}>
-                        <Image source={require('../../Images/travel.png')} style={style.icon} />
+                        <Image source={require('../../Images/dantak.png')} style={style.icon} />
                     </View>
                     {this.state.getOtp ?
                         (<View>
@@ -159,7 +159,7 @@ const style = StyleSheet.create(
 
         icon: {
             height: 100,
-            width: 100,
+            width: 130,
         },
 
         info: {

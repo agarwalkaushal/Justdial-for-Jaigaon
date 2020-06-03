@@ -51,8 +51,6 @@ class HomeScreen extends React.Component {
         });
     }
 
-
-
     render() {
         return (
             <View style={style.screen}>
@@ -70,6 +68,7 @@ class HomeScreen extends React.Component {
                             autoCapitalize="characters"
                         />
                         <FlatList
+                            contentContainerStyle={{ paddingBottom: 100 }}
                             data={this.state.dataSource}
                             renderItem={({ item }) => <Item item={item} navigateToDetailScreen={this.navigateToDetailScreen} />}
                         />
@@ -163,12 +162,12 @@ const style = StyleSheet.create(
         },
 
         title: {
-            fontSize: 28,
+            fontSize: 26,
             marginRight: 20,
         },
 
         rating: {
-            fontSize: 14,
+            fontSize: 13,
             fontWeight: 'bold',
             marginLeft: 5,
             marginRight: 5,
@@ -176,17 +175,17 @@ const style = StyleSheet.create(
         },
 
         address: {
-            fontSize: 16,
+            fontSize: 13,
             fontWeight: 'bold',
         },
 
         category: {
-            fontSize: 17,
+            fontSize: 15,
             fontWeight: 'bold',
         },
 
         about: {
-            fontSize: 16,
+            fontSize: 15,
             fontStyle: 'italic',
         },
     }
