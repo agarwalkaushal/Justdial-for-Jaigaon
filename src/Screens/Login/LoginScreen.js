@@ -159,7 +159,7 @@ const style = StyleSheet.create(
 
         icon: {
             height: 100,
-            width: 130,
+            width: 100,
         },
 
         info: {
